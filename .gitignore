@@ -75,3 +75,6 @@ __MACOSX/
 
 # Log files created by default by the nohup command
 nohup.out
+
+# Postgres Docker volume
+.db
