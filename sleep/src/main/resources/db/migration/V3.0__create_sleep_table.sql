@@ -6,7 +6,7 @@ CREATE TABLE IF NOT EXISTS sleep_log
     sleep_date DATE NOT NULL,
     start_time TIME NOT NULL,
     end_time TIME NOT NULL,
-    duration INTERVAL HOUR TO MINUTE NOT NULL,
+    duration INT NOT NULL,
     quality VARCHAR NOT NULL
 );
 
