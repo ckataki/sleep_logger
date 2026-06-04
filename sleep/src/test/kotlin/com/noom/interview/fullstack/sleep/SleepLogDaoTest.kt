@@ -44,14 +44,14 @@ class SleepLogDaoTest {
 
     @Test
     fun `insert should return a non-null UUID`() {
-        val id = sleepLogDao.insert(newSleepLog())
+        val id = sleepLogDao.insert(newSleepLog(userId))
 
         assertThat(id).isNotNull
     }
 
     @Test
     fun `insert should persist all fields correctly`() {
-        val sleepLog = newSleepLog(
+        val sleepLog = newSleepLog(userId,
             sleepDate = LocalDate.of(2024, 1, 15),
             startTime = LocalTime.of(23, 0),
             endTime = LocalTime.of(7, 0),
@@ -85,8 +85,8 @@ class SleepLogDaoTest {
         val yesterday = today.minusDays(1)
         val twoDaysAgo = today.minusDays(2)
 
-        sleepLogDao.insert(newSleepLog(sleepDate = twoDaysAgo, quality = SleepQuality.BAD))
-        sleepLogDao.insert(newSleepLog(sleepDate = yesterday, quality = SleepQuality.OK))
+        sleepLogDao.insert(newSleepLog(userId, sleepDate = twoDaysAgo, quality = SleepQuality.BAD))
+        sleepLogDao.insert(newSleepLog(userId, sleepDate = yesterday, quality = SleepQuality.OK))
         sleepLogDao.insert(newSleepLog(userId = userId2, sleepDate = today, quality = SleepQuality.GOOD))
 
         val result = sleepLogDao.findByUserId(userId)
@@ -106,7 +106,7 @@ class SleepLogDaoTest {
     @Test
     fun `findByUserIdAndDate should return the correct record`() {
         val date = LocalDate.of(2024, 6, 1)
-        sleepLogDao.insert(newSleepLog(sleepDate = date))
+        sleepLogDao.insert(newSleepLog(userId, sleepDate = date))
 
         val result = sleepLogDao.findByUserIdAndDate(userId, date)
 
@@ -127,10 +127,10 @@ class SleepLogDaoTest {
         val from = LocalDate.of(2024, 6, 1)
         val to = LocalDate.of(2024, 6, 10)
 
-        sleepLogDao.insert(newSleepLog(sleepDate = from))
-        sleepLogDao.insert(newSleepLog(sleepDate = LocalDate.of(2024, 6, 5)))
-        sleepLogDao.insert(newSleepLog(sleepDate = to))
-        sleepLogDao.insert(newSleepLog(sleepDate = LocalDate.of(2024, 6, 15)))
+        sleepLogDao.insert(newSleepLog(userId, sleepDate = from))
+        sleepLogDao.insert(newSleepLog(userId, sleepDate = LocalDate.of(2024, 6, 5)))
+        sleepLogDao.insert(newSleepLog(userId, sleepDate = to))
+        sleepLogDao.insert(newSleepLog(userId, sleepDate = LocalDate.of(2024, 6, 15)))
 
         val result = sleepLogDao.findByUserIdAndDateRange(userId, from, to)
 
@@ -139,7 +139,7 @@ class SleepLogDaoTest {
 
     @Test
     fun `findByUserIdAndDateRange should return empty list when no records exist in range`() {
-        sleepLogDao.insert(newSleepLog(sleepDate = LocalDate.of(2024, 1, 1)))
+        sleepLogDao.insert(newSleepLog(userId, sleepDate = LocalDate.of(2024, 1, 1)))
 
         val result = sleepLogDao.findByUserIdAndDateRange(
             userId, LocalDate.of(2024, 6, 1), LocalDate.of(2024, 6, 10)
@@ -159,21 +159,4 @@ class SleepLogDaoTest {
         assertThat(result1).hasSize(1)
         assertThat(result2).hasSize(1)
     }
-
-    @Suppress("LongParameterList")
-    private fun newSleepLog(
-        userId: UUID = this.userId,
-        sleepDate: LocalDate = LocalDate.now(),
-        startTime: LocalTime = LocalTime.of(23, 0),
-        endTime: LocalTime = LocalTime.of(7, 0),
-        duration: Duration = Duration.between(startTime, endTime).plusHours(24),
-        quality: SleepQuality = SleepQuality.GOOD,
-    ) = SleepLog(
-        userId = userId,
-        sleepDate = sleepDate,
-        startTime = startTime,
-        endTime = endTime,
-        duration = duration,
-        quality = quality,
-    )
 }
