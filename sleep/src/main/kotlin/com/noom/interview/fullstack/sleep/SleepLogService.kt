@@ -23,7 +23,7 @@ class SleepLogService(val sleepLogDao: SleepLogDao) {
         val from = to.minusDays(lookBackDays.toLong())
 
         if (to.isBefore(from) == true) {
-            return mapOf()
+            throw IllegalArgumentException("lookback_days must be positive")
         }
 
         val sleepLogList = sleepLogDao.findByUserIdAndDateRange(userId, from, to)

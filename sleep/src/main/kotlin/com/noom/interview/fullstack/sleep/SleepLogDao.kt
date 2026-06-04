@@ -45,7 +45,7 @@ class SleepLogDao(private val jdbc: NamedParameterJdbcTemplate) {
             keyHolder,
             arrayOf("id"),
         )
-        return keyHolder.keys?.get("id") as UUID
+        return requireNotNull(keyHolder.keys?.get("id") as? UUID) { "Failed to retrieve generated id" }
     }
 
     fun findById(id: UUID): SleepLog? =

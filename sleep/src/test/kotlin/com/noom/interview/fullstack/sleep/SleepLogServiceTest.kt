@@ -1,6 +1,7 @@
 package com.noom.interview.fullstack.sleep
 
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -152,10 +153,10 @@ class SleepLogServiceTest {
         }
 
         @Test
-        fun `should return empty map when lookBackDays is negative`() {
-            val result = sleepLogService.getAverageStats(userId, lookBackDays = -1)
-
-            assertThat(result).isEmpty()
+        fun `should throw exception when lookBackDays is negative`() {
+            assertThatThrownBy { sleepLogService.getAverageStats(userId, lookBackDays = -1) }
+                .isInstanceOf(IllegalArgumentException::class.java)
+                .hasMessage("lookback_days must be positive")
         }
 
         @Test

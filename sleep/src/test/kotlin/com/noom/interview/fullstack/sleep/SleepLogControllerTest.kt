@@ -99,12 +99,14 @@ class SleepLogControllerTest {
     }
 
     @Test
-    fun `getLastNightSleep should return 200 with empty body when no log exists`() {
+    fun `getLastNightSleep should return 404 when no log exists`() {
         Mockito.`when`(sleepLogService.getLastNightSleep(userId)).thenReturn(null)
 
         mockMvc.perform(get("/user/$userId/sleep/last"))
-            .andExpect(status().isOk)
-            .andExpect(content().string(""))
+            .andExpect(status().isNotFound)
+            .andExpect(jsonPath("$.error").value("not_found"))
+            .andExpect(jsonPath("$.message").value("No sleep log found for user"))
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
     }
 
     @Test
@@ -133,6 +135,46 @@ class SleepLogControllerTest {
             .andExpect(jsonPath("$.range_start").value("2024-01-01"))
             .andExpect(jsonPath("$.range_end").value("2024-01-31"))
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+    }
+
+    @Test
+    fun `addSleepLog should return 400 when path userId does not match body userId`() {
+        val otherUserId = UUID.randomUUID()
+
+        mockMvc.perform(post("/user/$userId/sleep/add")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(
+                // language=json
+                """
+                {
+                    "user_id": "$otherUserId",
+                    "sleep_date": "2024-01-15",
+                    "start_time": "23:00",
+                    "end_time": "07:00",
+                    "duration": "PT8H",
+                    "quality": "GOOD"
+                }
+                """.trimIndent(),
+            ))
+            .andExpect(status().isBadRequest)
+            .andExpect(jsonPath("$.error").value("bad_request"))
+            .andExpect(jsonPath("$.message").value("Path variable userId does not match request body userId"))
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+    }
+
+    @Test
+    fun `getSleepLogAverage should return 400 when lookback_days is negative`() {
+        Mockito.`when`(sleepLogService.getAverageStats(userId, -1))
+            .thenThrow(IllegalArgumentException("lookback_days must be positive"))
+
+        mockMvc.perform(get("/user/$userId/sleep/average")
+            .param("lookback_days", "-1"))
+            .andExpect(status().isBadRequest)
+            .andExpect(jsonPath("$.error").value("bad_request"))
+            .andExpect(jsonPath("$.message").value("lookback_days must be positive"))
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+
+        Mockito.verify(sleepLogService).getAverageStats(userId, -1)
     }
 
     @Test
