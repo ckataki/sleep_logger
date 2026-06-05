@@ -11,7 +11,7 @@ BASE_URL="http://localhost:8080"
 
 USERNAME="test_user_$(date +%s)"
 echo "=== 1. Create Test User ($USERNAME) ==="
-USER_ID=$(podman exec -i postgres_db psql -q -U user -d postgres -tAc \
+USER_ID=$(docker exec -i postgres_db psql -q -U user -d postgres -tAc \
   "INSERT INTO users (username) VALUES ('$USERNAME') RETURNING id;")
 echo "User ID: $USER_ID"
 pause
