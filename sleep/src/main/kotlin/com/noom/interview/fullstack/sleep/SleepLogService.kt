@@ -1,6 +1,7 @@
 package com.noom.interview.fullstack.sleep
 
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import java.time.Duration
 import java.time.LocalDate
 import java.time.LocalTime
@@ -10,6 +11,7 @@ import java.util.UUID
 @Service
 class SleepLogService(val sleepLogDao: SleepLogDao) {
 
+    @Transactional
     fun addSleepLog(sleepLog: SleepLog): UUID {
         val existing = sleepLogDao.findByUserIdAndDate(sleepLog.userId, sleepLog.sleepDate)
         if (existing != null) {
