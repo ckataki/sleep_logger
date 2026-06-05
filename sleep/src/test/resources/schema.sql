@@ -7,7 +7,7 @@ CREATE TABLE IF NOT EXISTS users
 CREATE TABLE IF NOT EXISTS sleep_log
 (
     id UUID DEFAULT RANDOM_UUID() PRIMARY KEY,
-    user_id VARCHAR REFERENCES users (id) ON DELETE CASCADE,
+    user_id UUID REFERENCES users (id) ON DELETE CASCADE,
     sleep_date DATE NOT NULL,
     start_time TIME NOT NULL,
     end_time TIME NOT NULL,
