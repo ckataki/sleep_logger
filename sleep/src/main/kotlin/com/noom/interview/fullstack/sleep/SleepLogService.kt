@@ -10,7 +10,13 @@ import java.util.UUID
 @Service
 class SleepLogService(val sleepLogDao: SleepLogDao) {
 
-    fun addSleepLog(sleepLog: SleepLog): UUID = sleepLogDao.insert(sleepLog)
+    fun addSleepLog(sleepLog: SleepLog): UUID {
+        val existing = sleepLogDao.findByUserIdAndDate(sleepLog.userId, sleepLog.sleepDate)
+        if (existing != null) {
+            throw DuplicateSleepLogException(sleepLog.sleepDate)
+        }
+        return sleepLogDao.insert(sleepLog)
+    }
 
     fun getLastNightSleep(userId: UUID): SleepLog? {
         val yesterday = LocalDate.now().minusDays(1)

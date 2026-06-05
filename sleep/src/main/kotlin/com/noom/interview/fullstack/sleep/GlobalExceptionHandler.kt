@@ -45,6 +45,15 @@ class GlobalExceptionHandler {
         )
     }
 
+    @ExceptionHandler(DuplicateSleepLogException::class)
+    fun handleDuplicateSleepLog(ex: DuplicateSleepLogException): ResponseEntity<ErrorResponse> {
+        log.warn("Duplicate sleep log", ex)
+        return ResponseEntity(
+            ErrorResponse("conflict", ex.message),
+            HttpStatus.CONFLICT,
+        )
+    }
+
     @ExceptionHandler(DataIntegrityViolationException::class)
     fun handleDataIntegrityViolation(ex: DataIntegrityViolationException): ResponseEntity<ErrorResponse> {
         log.error("Data integrity violation", ex)

@@ -138,6 +138,41 @@ class SleepLogControllerTest {
     }
 
     @Test
+    fun `addSleepLog should return 409 when sleep log already exists`() {
+        val sleepDate = LocalDate.of(2024, 1, 15)
+        val sleepLog = SleepLog(
+            userId = userId,
+            sleepDate = sleepDate,
+            startTime = LocalTime.of(23, 0),
+            endTime = LocalTime.of(7, 0),
+            duration = Duration.ofHours(8),
+            quality = SleepQuality.GOOD,
+        )
+        Mockito.`when`(sleepLogService.addSleepLog(sleepLog))
+            .thenThrow(DuplicateSleepLogException(sleepDate))
+
+        mockMvc.perform(post("/user/$userId/sleep/add")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(
+                // language=json
+                """
+                {
+                    "user_id": "$userId",
+                    "sleep_date": "2024-01-15",
+                    "start_time": "23:00",
+                    "end_time": "07:00",
+                    "duration": "PT8H",
+                    "quality": "GOOD"
+                }
+                """.trimIndent(),
+            ))
+            .andExpect(status().isConflict)
+            .andExpect(jsonPath("$.error").value("conflict"))
+            .andExpect(jsonPath("$.message").value("A sleep log already exists for this user on 2024-01-15"))
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+    }
+
+    @Test
     fun `addSleepLog should return 400 when path userId does not match body userId`() {
         val otherUserId = UUID.randomUUID()
 

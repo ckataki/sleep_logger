@@ -33,12 +33,28 @@ class SleepLogServiceTest {
         fun `should delegate to DAO and return UUID`() {
             val sleepLog = newSleepLog(userId)
             val expectedUuid = UUID.randomUUID()
+            Mockito.`when`(sleepLogDao.findByUserIdAndDate(sleepLog.userId, sleepLog.sleepDate)).thenReturn(null)
             Mockito.`when`(sleepLogDao.insert(sleepLog)).thenReturn(expectedUuid)
 
             val result = sleepLogService.addSleepLog(sleepLog)
 
             assertThat(result).isEqualTo(expectedUuid)
+            Mockito.verify(sleepLogDao).findByUserIdAndDate(sleepLog.userId, sleepLog.sleepDate)
             Mockito.verify(sleepLogDao).insert(sleepLog)
+        }
+
+        @Test
+        fun `should throw DuplicateSleepLogException when sleep log already exists for that date`() {
+            val sleepLog = newSleepLog(userId)
+            val existing = newSleepLog(userId, sleepDate = sleepLog.sleepDate)
+            Mockito.`when`(sleepLogDao.findByUserIdAndDate(sleepLog.userId, sleepLog.sleepDate)).thenReturn(existing)
+
+            assertThatThrownBy { sleepLogService.addSleepLog(sleepLog) }
+                .isInstanceOf(DuplicateSleepLogException::class.java)
+                .hasMessage("A sleep log already exists for this user on ${sleepLog.sleepDate}")
+
+            Mockito.verify(sleepLogDao).findByUserIdAndDate(sleepLog.userId, sleepLog.sleepDate)
+            Mockito.verify(sleepLogDao, Mockito.never()).insert(sleepLog)
         }
     }
 
